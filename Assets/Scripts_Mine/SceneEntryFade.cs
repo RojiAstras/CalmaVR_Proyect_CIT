@@ -8,7 +8,7 @@ public class SceneEntryFade : MonoBehaviour
     public float fadeDuration = 1f;
     public float delayBeforeFade = 0f;
 
-    void Start()
+    void awake()
     {
         if (fadeCanvasGroup != null)
         {

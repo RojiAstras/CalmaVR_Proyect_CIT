@@ -16,7 +16,9 @@ public class QuestionnaireManager : MonoBehaviour
     public Button noButton;
     public Button nextButton;
 
+    [Header ("Paneles Salida")]
     public GameObject ClosedPanel;
+    public GameObject ExitPanel;
 
     [Header("Preguntas")]
     public List<Question> questionList = new List<Question>();
@@ -104,5 +106,6 @@ public class QuestionnaireManager : MonoBehaviour
     void DisableCanvas()
     {
         ClosedPanel.SetActive(false);
+        ExitPanel.SetActive(true);
     }
 }

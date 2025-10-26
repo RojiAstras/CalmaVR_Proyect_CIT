@@ -7,6 +7,7 @@ TagManager:
   - Whiteboard
   - Left Hand
   - Right Hand
+  - PaperBall
   layers:
   - Default
   - TransparentFX

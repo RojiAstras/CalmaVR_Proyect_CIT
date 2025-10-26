@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+
+
 
 public class BreathingSequence : MonoBehaviour
 {
@@ -9,6 +12,9 @@ public class BreathingSequence : MonoBehaviour
     public GameObject panelStart;
     public GameObject panelintro;
     public GameObject breathingSphere;
+
+    [Header("Texts")]
+    public TMP_Text phaseText; //Texto "Inhala / Manten / Exhala"
 
     [Header("Settings")]
     public int totalCycles = 3;
@@ -37,6 +43,11 @@ public class BreathingSequence : MonoBehaviour
         {
             sphereRenderer = breathingSphere.GetComponent<Renderer>();
         }
+
+        if (phaseText != null)
+        {
+            phaseText.text = "";
+        }
     }
 
     public void StartSequence ()
@@ -64,17 +75,23 @@ public class BreathingSequence : MonoBehaviour
             currentCycle++;
 
             //Inhalar (Aumenta el tamaño)
+            if (phaseText) phaseText.text = "Inhala";
             yield return StartCoroutine(ScaleSphere(maxScale, inhaleTime, inhaleColor));
 
             // Mantener (aguante)
+            if (phaseText) phaseText.text = "Manten";
             yield return StartCoroutine(HoldPhase(holdTime, holdColor));
 
             //Exhalar (disminuye el tamaño)
+            if (phaseText) phaseText.text = "Exhala";
             yield return StartCoroutine(ScaleSphere(minScale, exhaleTime, exhaleColor));
         }
 
         //Final
         breathingActive = false;
+        if (phaseText) phaseText.text = "Ejercicio Completado";
+        yield return new WaitForSeconds(3f);
+        phaseText.text = "";
         breathingSphere.SetActive(false);
         panelStart.SetActive(true); // volver al inicio o tambien cambiarlo a una pantalla que diga "ejercicio completado"
     }
