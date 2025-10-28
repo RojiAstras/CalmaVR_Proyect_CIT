@@ -13,8 +13,6 @@ public class PaperCrumple : MonoBehaviour
     public string rightHandTag = "Right Hand";
 
     private XRGrabInteractable grabInteractable;
-    private bool isHeld = false;
-    private bool isCrumpled = false;
     private string holdingHandTag = "";
     private float touchTimer = 0f;
 
@@ -33,7 +31,6 @@ public class PaperCrumple : MonoBehaviour
  
     void OnGrab(SelectEnterEventArgs args)
     {
-        isHeld = true;
 
         //Derecta que mano lo tomo
         var interactor = args.interactorObject.transform;
@@ -54,7 +51,6 @@ public class PaperCrumple : MonoBehaviour
 
     void OnRelease(SelectExitEventArgs args)
     {
-        isHeld = false;
         holdingHandTag = "";
     }
 
@@ -83,7 +79,6 @@ public class PaperCrumple : MonoBehaviour
 
     void CrumplePaper()
     {
-        isCrumpled = true;
 
         //Crear esfera en la misma posicion y rotacion
         GameObject newSphere = Instantiate(sphereVersion, transform.position, transform.rotation);
