@@ -10,25 +10,28 @@ public class TutorialManager : MonoBehaviour
 
     [Header("Pasos del tutorial (en orden)")]
     public GameObject[] tutorialSteps;
+    [Tooltip("Grabaciones de voz para cada paso (mismo orden que tutorialSteps)")]
+    public AudioClip[] stepVoiceClips;
+
+    [Header("Voz final del tutorial")]
+    public AudioClip finalVoiceClip;
+
+    [Header("Audio Source")]
+    [Tooltip("Fuente de audio que reproducirá las voces del tutorial")]
+    public AudioSource audioSource;
 
     [Header("Acciones de entrada")]
-    [Tooltip("Botón lateral de agarre")]
     public InputActionReference gripAction;
-    [Tooltip("Gatillo frontal (para interacción y teletransporte)")]
     public InputActionReference triggerAction;
-    [Tooltip("Joystick para movimiento")]
     public InputActionReference moveAction;
 
     [Header("Configuración general")]
-    [Tooltip("Si está activado, el tutorial avanza automáticamente después de un tiempo.")]
     public bool avanzarAutomaticamente = false;
-    [Tooltip("Segundos que dura cada paso si el modo automático está activado.")]
-    public float autoNextDelay = 5f;
-    [Tooltip("Tiempo mínimo que se debe mantener presionado el gatillo para completar el teletransporte.")]
+    [Tooltip("Segundos extra que se agregan al final de cada grabación antes de pasar al siguiente paso")]
+    public float extraDelayPorPaso = 2f;
     public float teleportHoldTime = 1.0f;
 
     [Header("Inicio del tutorial")]
-    [Tooltip("Retraso (en segundos) antes de comenzar el tutorial al iniciar la escena.")]
     public float startDelay = 2f;
 
     [Header("Objeto a activar al finalizar el tutorial")]
@@ -36,20 +39,15 @@ public class TutorialManager : MonoBehaviour
 
     private int currentStep = 0;
     private bool tutorialRunning = false;
-    private float timer = 0f;
     private float teleportTimer = 0f;
     private bool triggerHeld = false;
 
     void Start()
     {
-        // Desactivar todos los pasos al inicio
         foreach (var step in tutorialSteps)
             step.SetActive(false);
 
-        // Activar acciones de entrada (aunque aún no inicie el tutorial)
         EnableInputs();
-
-        // Iniciar el tutorial con retraso
         StartCoroutine(StartTutorialAfterDelay());
     }
 
@@ -64,26 +62,17 @@ public class TutorialManager : MonoBehaviour
         tutorialRunning = true;
 
         if (tutorialSteps.Length > 0)
+        {
             tutorialSteps[0].SetActive(true);
-
-        timer = 0f;
-        teleportTimer = 0f;
+            PlayVoiceForStep(0);
+        }
     }
 
     void Update()
     {
         if (!tutorialRunning) return;
 
-        if (avanzarAutomaticamente)
-        {
-            timer += Time.deltaTime;
-            if (timer >= autoNextDelay)
-            {
-                NextStep();
-                timer = 0f;
-            }
-        }
-        else
+        if (!avanzarAutomaticamente)
         {
             CheckForActions();
         }
@@ -108,7 +97,7 @@ public class TutorialManager : MonoBehaviour
         {
             float triggerValue = triggerAction.action.ReadValue<float>();
 
-            if (triggerValue > 0.8f) // se empieza a mantener
+            if (triggerValue > 0.8f)
             {
                 triggerHeld = true;
                 teleportTimer += Time.deltaTime;
@@ -116,15 +105,36 @@ public class TutorialManager : MonoBehaviour
             else
             {
                 if (triggerHeld && teleportTimer >= teleportHoldTime)
-                {
-                    // soltó el gatillo después de mantenerlo el tiempo suficiente
                     NextStep();
-                }
-                // reset
+
                 triggerHeld = false;
                 teleportTimer = 0f;
             }
         }
+    }
+
+    void PlayVoiceForStep(int stepIndex)
+    {
+        if (audioSource && stepVoiceClips != null && stepIndex < stepVoiceClips.Length && stepVoiceClips[stepIndex] != null)
+        {
+            audioSource.Stop();
+            audioSource.clip = stepVoiceClips[stepIndex];
+            audioSource.Play();
+
+            if (avanzarAutomaticamente)
+                StartCoroutine(AutoNextAfterClip(stepVoiceClips[stepIndex].length + extraDelayPorPaso));
+        }
+        else if (avanzarAutomaticamente)
+        {
+            // Si no hay clip, usar solo el retraso extra
+            StartCoroutine(AutoNextAfterClip(extraDelayPorPaso));
+        }
+    }
+
+    IEnumerator AutoNextAfterClip(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        NextStep();
     }
 
     public void NextStep()
@@ -134,24 +144,36 @@ public class TutorialManager : MonoBehaviour
             tutorialSteps[currentStep].SetActive(false);
             currentStep++;
             tutorialSteps[currentStep].SetActive(true);
+            PlayVoiceForStep(currentStep);
         }
         else
         {
-            EndTutorial();
+            StartCoroutine(EndTutorialWithVoice());
         }
     }
 
-    void EndTutorial()
+    IEnumerator EndTutorialWithVoice()
     {
         tutorialRunning = false;
 
         if (currentStep < tutorialSteps.Length)
             tutorialSteps[currentStep].SetActive(false);
 
+        // Reproducir la voz final (si existe)
+        if (audioSource && finalVoiceClip != null)
+        {
+            audioSource.Stop();
+            audioSource.clip = finalVoiceClip;
+            audioSource.Play();
+            yield return new WaitForSeconds(finalVoiceClip.length + extraDelayPorPaso);
+        }
+
         if (objectToActivateAtEnd != null)
+        {
             leftControllerModel.SetActive(false);
             rightControllerModel.SetActive(false);
             objectToActivateAtEnd.SetActive(true);
+        }
 
         gameObject.SetActive(false);
     }
