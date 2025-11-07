@@ -50,7 +50,7 @@ Material:
     - _refraction_scale: 0.5
     - _refraction_speed: 0.03
     - _refraction_strength: 0.5
-    - _smoothness: 1
+    - _smoothness: 0
     - _water_depth: 1
     m_Colors:
     - _deep_color: {r: 0.015286517, g: 0.2578812, b: 0.42641494, a: 0.06666667}

@@ -1564,12 +1564,18 @@ MonoBehaviour:
   questionList:
   - questionText: Estas Ansioso o Estresado?
     questionType: yesno
-    scaleAnswer: 0
+    useEmojis: 0
     yesNoAnswer: 1
+    scaleAnswer: 0
   - questionText: Que tan Estresado o Ansioso estas? del 1 al 10
     questionType: scale
-    scaleAnswer: 10
+    useEmojis: 1
     yesNoAnswer: 0
+    scaleAnswer: 10
+  emojiText: {fileID: 4839542825881455699}
+  endAudioClip: {fileID: 0}
+  audioSource: {fileID: 0}
+  endAudioDelay: 0.5
 --- !u!1001 &2919173162809710349
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1905,6 +1911,18 @@ MonoBehaviour:
 --- !u!114 &4137441496847894570 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7914508195609034484, guid: fbc4e2218c06ed144b2ab0a893dc6114,
+    type: 3}
+  m_PrefabInstance: {fileID: 6106562630030587614}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &4839542825881455699 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1699929452279085709, guid: fbc4e2218c06ed144b2ab0a893dc6114,
     type: 3}
   m_PrefabInstance: {fileID: 6106562630030587614}
   m_PrefabAsset: {fileID: 0}

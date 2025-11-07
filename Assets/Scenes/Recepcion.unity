@@ -3734,6 +3734,18 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fbc4e2218c06ed144b2ab0a893dc6114, type: 3}
+--- !u!114 &700991466 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1699929452279085709, guid: fbc4e2218c06ed144b2ab0a893dc6114,
+    type: 3}
+  m_PrefabInstance: {fileID: 700991465}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &716425535
 GameObject:
   m_ObjectHideFlags: 0
@@ -5833,9 +5845,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   m_InteractionLayers:
-    m_Bits: 1
+    m_Bits: 4294967295
   m_DistanceCalculationMode: 1
-  m_SelectMode: 0
+  m_SelectMode: 1
   m_FocusMode: 1
   m_CustomReticle: {fileID: 0}
   m_AllowGazeInteraction: 0
@@ -5925,7 +5937,7 @@ MonoBehaviour:
   m_SnapToColliderVolume: 1
   m_ReinitializeDynamicAttachEverySingleGrab: 1
   m_AttachEaseInTime: 0.15
-  m_MovementType: 2
+  m_MovementType: 0
   m_VelocityDamping: 1
   m_VelocityScale: 1
   m_AngularVelocityDamping: 1
@@ -8363,12 +8375,15 @@ MonoBehaviour:
   questionList:
   - questionText: Estas Ansioso o Estresado?
     questionType: yesno
-    scaleAnswer: 0
+    useEmojis: 0
     yesNoAnswer: 1
+    scaleAnswer: 0
   - questionText: Que Tan Ansioso o Estresado estas? del 1 al 10
     questionType: scale
-    scaleAnswer: 10
+    useEmojis: 1
     yesNoAnswer: 0
+    scaleAnswer: 10
+  emojiText: {fileID: 700991466}
   endAudioClip: {fileID: 8300000, guid: ce97c77c983bf644a8fa5fa48bbec8a4, type: 3}
   audioSource: {fileID: 1430864117}
   endAudioDelay: 0
@@ -9942,7 +9957,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Texture
       value: 
-      objectReference: {fileID: 2800000, guid: cd58d6851875a5648a80ba5c4c111cb0, type: 3}
+      objectReference: {fileID: 2800000, guid: 7cd1b1b649a241f47b44b13654dfecd2, type: 3}
     - target: {fileID: 3062544974741298773, guid: 775539a5ef96aef48a88a454703d45a5,
         type: 3}
       propertyPath: m_Name

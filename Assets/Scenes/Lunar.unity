@@ -10730,6 +10730,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2750809861592779792, guid: 3d035e7f0b0f42648a011b8227152d47,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8286609548765077373, guid: 3d035e7f0b0f42648a011b8227152d47,
         type: 3}
       propertyPath: fadeCanvasGroup

@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Audio; // 👈 agregado si usas AudioMixer
+using UnityEngine.Audio;
 
 public class QuestionnaireManager : MonoBehaviour
 {
     [Header("UI Elements")]
     public GameObject questionnairePanel;   // Panel principal del cuestionario
     public TMP_Text questionText;
-    public Slider scaleSlider; //para preguntas de "1 a 10"
+    public Slider scaleSlider; // para preguntas tipo escala "1 a 10"
     public Button yesButton;
     public Button noButton;
     public Button nextButton;
@@ -22,6 +22,10 @@ public class QuestionnaireManager : MonoBehaviour
 
     [Header("Preguntas")]
     public List<Question> questionList = new List<Question>();
+
+    [Header("Emoji Settings")]
+    [Tooltip("Texto que mostrará el emoji asociado al valor del slider")]
+    public TMP_Text emojiText; // 👈 nuevo campo para mostrar emojis
 
     [Header("Audio Final")]
     [Tooltip("Clip de audio que se reproducirá al finalizar el cuestionario")]
@@ -34,6 +38,12 @@ public class QuestionnaireManager : MonoBehaviour
     private int currentQuestionIndex = 0;
     private QuestionnaireData currentData;
 
+    // Secuencia de emojis del más feliz al más enojado 😄→😡
+    private readonly string[] calmEmojis = new string[]
+    {
+        "😄", "😊", "🙂", "😐", "😕", "😟", "😣", "😫", "😤", "😠", "😡"
+    };
+
     void Start()
     {
         // Si no hay AudioSource asignado, creamos uno en este objeto
@@ -44,6 +54,10 @@ public class QuestionnaireManager : MonoBehaviour
             audioSource.loop = false;
         }
 
+        // Aseguramos que el texto de emoji esté oculto inicialmente
+        if (emojiText != null)
+            emojiText.gameObject.SetActive(false);
+
         currentData = new QuestionnaireData()
         {
             QuestionnaireId = Guid.NewGuid().ToString(),
@@ -53,13 +67,15 @@ public class QuestionnaireManager : MonoBehaviour
 
         questionnairePanel.SetActive(true);
         ShowQuestion();
+
+        // Vincular evento del slider
+        scaleSlider.onValueChanged.AddListener(OnSliderValueChanged);
     }
 
     void ShowQuestion()
     {
         if (currentQuestionIndex >= questionList.Count)
         {
-            //Guardar respuestas cuando termine
             EndQuestionnaire();
             return;
         }
@@ -71,10 +87,34 @@ public class QuestionnaireManager : MonoBehaviour
         yesButton.gameObject.SetActive(current.questionType == "yesno");
         noButton.gameObject.SetActive(current.questionType == "yesno");
         nextButton.gameObject.SetActive(current.questionType == "scale");
+
+        // Mostrar emojis si la pregunta lo requiere
+        if (emojiText != null)
+        {
+            bool usarEmojis = current.useEmojis && current.questionType == "scale";
+            emojiText.gameObject.SetActive(usarEmojis);
+            if (usarEmojis)
+                UpdateEmojiDisplay((int)scaleSlider.value);
+        }
     }
 
-    // Metodos de UI
+    public void OnSliderValueChanged(float value)
+    {
+        if (currentQuestionIndex < questionList.Count)
+        {
+            Question current = questionList[currentQuestionIndex];
+            if (current.useEmojis && emojiText != null)
+                UpdateEmojiDisplay(Mathf.RoundToInt(value));
+        }
+    }
 
+    void UpdateEmojiDisplay(int value)
+    {
+        value = Mathf.Clamp(value, 0, 10);
+        emojiText.text = calmEmojis[value];
+    }
+
+    // Métodos de UI
     public void OnYesClicked()
     {
         questionList[currentQuestionIndex].yesNoAnswer = true;
@@ -104,13 +144,14 @@ public class QuestionnaireManager : MonoBehaviour
     {
         QuestionnaireData.SaveToJson(currentData);
 
-        questionText.text = "Gracias por tu opinión";
+        questionText.text = "Gracias por tu opinión 😊";
         scaleSlider.gameObject.SetActive(false);
         yesButton.gameObject.SetActive(false);
         noButton.gameObject.SetActive(false);
         nextButton.gameObject.SetActive(false);
+        if (emojiText != null)
+            emojiText.gameObject.SetActive(false);
 
-        // Esperar un par de segundos antes de desactivar el canvas
         Invoke(nameof(DisableCanvas), 2f);
     }
 
@@ -119,7 +160,6 @@ public class QuestionnaireManager : MonoBehaviour
         ClosedPanel.SetActive(false);
         ExitPanel.SetActive(true);
 
-        // Reproducir el audio final si existe
         if (endAudioClip != null)
             StartCoroutine(PlayEndAudioAfterDelay());
     }
@@ -127,9 +167,10 @@ public class QuestionnaireManager : MonoBehaviour
     IEnumerator PlayEndAudioAfterDelay()
     {
         yield return new WaitForSeconds(endAudioDelay);
-
         audioSource.clip = endAudioClip;
-        audioSource.priority = 10; // Alta prioridad para que no se corte
+        audioSource.priority = 10;
         audioSource.Play();
     }
 }
+
+

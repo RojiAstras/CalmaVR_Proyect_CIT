@@ -1,9 +1,9 @@
-
-[System.Serializable]
+﻿[System.Serializable]
 public class Question
 {
-    public string questionText; // texto de la pregunta
-    public string questionType; //"scale" o "yesno"
-    public int scaleAnswer; //1-10
-    public bool yesNoAnswer; //true/false
+    public string questionText;
+    public string questionType; // "yesno" o "scale"
+    public bool useEmojis; // 👈 nuevo campo
+    public bool yesNoAnswer;
+    public int scaleAnswer;
 }
