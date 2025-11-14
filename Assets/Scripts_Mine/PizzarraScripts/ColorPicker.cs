@@ -1,55 +1,75 @@
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
+Ôªøusing UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.InputSystem;
 
-public class ColorPicker : MonoBehaviour, IPointerClickHandler
+[RequireComponent(typeof(Collider))]
+public class ColorPickerXR : MonoBehaviour
 {
-    [Header("Referencias")]
-    public RawImage colorWheelImage;      // Imagen con la textura de la rueda de color
-    public Renderer targetRenderer;       // El cubo u objeto cuyo material cambiar· de color
+    [Header("Configuraci√≥n XR")]
+    public XRRayInteractor rayInteractor;      // Rayo del controlador XR
+    public InputActionProperty selectAction;   // Acci√≥n del gatillo (Trigger)
 
-    private Texture2D colorTexture;
+    [Header("Objetivos")]
+    public Renderer targetRenderer;            // Objeto a colorear (por ejemplo, un cubo)
+    public Texture2D colorTexture;             // Textura de la rueda (opcional)
+
+    private bool isSelecting = false;
+    private Renderer thisRenderer;
 
     void Start()
     {
-        if (colorWheelImage != null)
+        thisRenderer = GetComponent<Renderer>();
+
+        // Si no se asigna la textura manualmente, intenta obtenerla del material del objeto
+        if (colorTexture == null && thisRenderer != null && thisRenderer.material.mainTexture != null)
         {
-            // Convertimos la textura en Texture2D para poder leer sus pÌxeles
-            colorTexture = colorWheelImage.texture as Texture2D;
+            // Intentamos convertir la textura del material a Texture2D
+            colorTexture = thisRenderer.material.mainTexture as Texture2D;
+
+            if (colorTexture == null)
+            {
+                Debug.LogWarning("‚ö† La textura del material no es una Texture2D o no tiene 'Read/Write Enabled'.");
+            }
+        }
+
+        if (selectAction != null)
+        {
+            selectAction.action.performed += OnSelectPerformed;
+            selectAction.action.canceled += OnSelectCanceled;
         }
     }
 
-    // Se llama cuando el usuario hace clic en la imagen
-    public void OnPointerClick(PointerEventData eventData)
+    void OnDestroy()
     {
-        Vector2 localCursor;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            colorWheelImage.rectTransform,
-            eventData.position,
-            eventData.pressEventCamera,
-            out localCursor);
-
-        Rect rect = colorWheelImage.rectTransform.rect;
-        float x = Mathf.InverseLerp(rect.xMin, rect.xMax, localCursor.x);
-        float y = Mathf.InverseLerp(rect.yMin, rect.yMax, localCursor.y);
-
-        // Convertimos las coordenadas a posiciÛn dentro de la textura
-        if (colorTexture != null)
+        if (selectAction != null)
         {
-            int texX = Mathf.Clamp((int)(x * colorTexture.width), 0, colorTexture.width - 1);
-            int texY = Mathf.Clamp((int)(y * colorTexture.height), 0, colorTexture.height - 1);
-
-            Color selectedColor = colorTexture.GetPixel(texX, texY);
-            ApplyColor(selectedColor);
+            selectAction.action.performed -= OnSelectPerformed;
+            selectAction.action.canceled -= OnSelectCanceled;
         }
     }
 
-    private void ApplyColor(Color newColor)
+    void OnSelectPerformed(InputAction.CallbackContext ctx) => isSelecting = true;
+    void OnSelectCanceled(InputAction.CallbackContext ctx) => isSelecting = false;
+
+    void Update()
     {
-        if (targetRenderer != null)
+        if (rayInteractor == null || colorTexture == null)
+            return;
+
+        // Verificamos si el rayo golpea algo
+        if (rayInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit))
         {
-            targetRenderer.material.color = newColor;
+            // Solo si golpea este mismo objeto
+            if (hit.collider != null && hit.collider.gameObject == gameObject)
+            {
+                Vector2 uv = hit.textureCoord;
+                Color color = colorTexture.GetPixelBilinear(uv.x, uv.y);
+
+                if (isSelecting && targetRenderer != null)
+                {
+                    targetRenderer.material.color = color;
+                }
+            }
         }
     }
 }

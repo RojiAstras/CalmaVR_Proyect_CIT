@@ -86,7 +86,10 @@ public class WhiteboardMarkerXR : MonoBehaviour
 
                 if (_touchedLastFrame)
                 {
-                    _whiteboard.texture.SetPixels(x, y, _penSize, _penSize, _colors);
+                    // Actualizar el color actual del marcador
+                    _colors = Enumerable.Repeat(_renderer.material.color, _penSize * _penSize).ToArray();
+                    int halfPen = _penSize / 2;
+                    _whiteboard.texture.SetPixels(x - halfPen, y - halfPen, _penSize, _penSize, _colors);
 
                     for (float f = 0.01f; f < 1.00f; f += 0.01f)
                     {
@@ -139,7 +142,7 @@ public class WhiteboardMarkerXR : MonoBehaviour
         if (sizeCanvas == null || sizeText == null) return;
 
         sizeCanvas.gameObject.SetActive(true);
-        sizeText.text = $"Tamaño: {_penSize}";
+        sizeText.text = $"{_penSize}";
 
         if (hideUICoroutine != null)
             StopCoroutine(hideUICoroutine);

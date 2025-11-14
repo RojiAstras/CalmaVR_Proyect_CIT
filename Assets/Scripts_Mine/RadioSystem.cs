@@ -35,7 +35,10 @@ public class RadioSystem : MonoBehaviour
 
     void Update()
     {
-        if (!isHeld) return;
+        if (!isHeld)
+        {
+            return;
+        }
 
         if (nextSongButton.action.WasPerformedThisFrame())
         {

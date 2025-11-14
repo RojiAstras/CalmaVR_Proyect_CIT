@@ -7,3 +7,4 @@ public class Question
     public bool yesNoAnswer;
     public int scaleAnswer;
 }
+

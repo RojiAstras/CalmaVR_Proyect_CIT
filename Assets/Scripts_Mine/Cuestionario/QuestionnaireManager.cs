@@ -9,9 +9,9 @@ using UnityEngine.Audio;
 public class QuestionnaireManager : MonoBehaviour
 {
     [Header("UI Elements")]
-    public GameObject questionnairePanel;   // Panel principal del cuestionario
+    public GameObject questionnairePanel;
     public TMP_Text questionText;
-    public Slider scaleSlider; // para preguntas tipo escala "1 a 10"
+    public Slider scaleSlider;
     public Button yesButton;
     public Button noButton;
     public Button nextButton;
@@ -24,29 +24,21 @@ public class QuestionnaireManager : MonoBehaviour
     public List<Question> questionList = new List<Question>();
 
     [Header("Emoji Settings")]
-    [Tooltip("Texto que mostrará el emoji asociado al valor del slider")]
-    public TMP_Text emojiText; // 👈 nuevo campo para mostrar emojis
+    [Tooltip("RawImage donde se mostrará el emoji asociado al valor del slider")]
+    public RawImage emojiImage; // 👈 cambiado a RawImage
+    [Tooltip("Lista de texturas (0 = feliz, 10 = enojado)")]
+    public List<Texture2D> emojiTextures = new List<Texture2D>(); // 👈 cambiamos Sprite → Texture2D
 
     [Header("Audio Final")]
-    [Tooltip("Clip de audio que se reproducirá al finalizar el cuestionario")]
     public AudioClip endAudioClip;
-    [Tooltip("AudioSource que reproducirá el audio final (si no hay uno, se crea automáticamente)")]
     public AudioSource audioSource;
-    [Tooltip("Tiempo (en segundos) a esperar después de mostrar el panel final antes de reproducir el audio")]
     public float endAudioDelay = 0.5f;
 
     private int currentQuestionIndex = 0;
     private QuestionnaireData currentData;
 
-    // Secuencia de emojis del más feliz al más enojado 😄→😡
-    private readonly string[] calmEmojis = new string[]
-    {
-        "😄", "😊", "🙂", "😐", "😕", "😟", "😣", "😫", "😤", "😠", "😡"
-    };
-
     void Start()
     {
-        // Si no hay AudioSource asignado, creamos uno en este objeto
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -54,21 +46,21 @@ public class QuestionnaireManager : MonoBehaviour
             audioSource.loop = false;
         }
 
-        // Aseguramos que el texto de emoji esté oculto inicialmente
-        if (emojiText != null)
-            emojiText.gameObject.SetActive(false);
+        if (emojiImage != null)
+            emojiImage.gameObject.SetActive(false);
 
         currentData = new QuestionnaireData()
         {
             QuestionnaireId = Guid.NewGuid().ToString(),
             userName = "Anonimo",
-            dateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+            dateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name // ✅ Guarda el nombre de la escena
         };
+
 
         questionnairePanel.SetActive(true);
         ShowQuestion();
 
-        // Vincular evento del slider
         scaleSlider.onValueChanged.AddListener(OnSliderValueChanged);
     }
 
@@ -83,18 +75,18 @@ public class QuestionnaireManager : MonoBehaviour
         Question current = questionList[currentQuestionIndex];
         questionText.text = current.questionText;
 
-        scaleSlider.gameObject.SetActive(current.questionType == "scale");
+        bool isScale = current.questionType == "scale";
+        scaleSlider.gameObject.SetActive(isScale);
         yesButton.gameObject.SetActive(current.questionType == "yesno");
         noButton.gameObject.SetActive(current.questionType == "yesno");
-        nextButton.gameObject.SetActive(current.questionType == "scale");
+        nextButton.gameObject.SetActive(isScale);
 
-        // Mostrar emojis si la pregunta lo requiere
-        if (emojiText != null)
+        if (emojiImage != null)
         {
-            bool usarEmojis = current.useEmojis && current.questionType == "scale";
-            emojiText.gameObject.SetActive(usarEmojis);
+            bool usarEmojis = current.useEmojis && isScale;
+            emojiImage.gameObject.SetActive(usarEmojis);
             if (usarEmojis)
-                UpdateEmojiDisplay((int)scaleSlider.value);
+                UpdateEmojiDisplay(Mathf.RoundToInt(scaleSlider.value));
         }
     }
 
@@ -103,15 +95,17 @@ public class QuestionnaireManager : MonoBehaviour
         if (currentQuestionIndex < questionList.Count)
         {
             Question current = questionList[currentQuestionIndex];
-            if (current.useEmojis && emojiText != null)
+            if (current.useEmojis && emojiImage != null)
                 UpdateEmojiDisplay(Mathf.RoundToInt(value));
         }
     }
 
     void UpdateEmojiDisplay(int value)
     {
-        value = Mathf.Clamp(value, 0, 10);
-        emojiText.text = calmEmojis[value];
+        if (emojiTextures == null || emojiTextures.Count == 0) return;
+
+        value = Mathf.Clamp(value, 0, Mathf.Min(emojiTextures.Count - 1, 10));
+        emojiImage.texture = emojiTextures[value]; // 👈 cambiamos sprite → texture
     }
 
     // Métodos de UI
@@ -149,8 +143,9 @@ public class QuestionnaireManager : MonoBehaviour
         yesButton.gameObject.SetActive(false);
         noButton.gameObject.SetActive(false);
         nextButton.gameObject.SetActive(false);
-        if (emojiText != null)
-            emojiText.gameObject.SetActive(false);
+
+        if (emojiImage != null)
+            emojiImage.gameObject.SetActive(false);
 
         Invoke(nameof(DisableCanvas), 2f);
     }
@@ -172,5 +167,3 @@ public class QuestionnaireManager : MonoBehaviour
         audioSource.Play();
     }
 }
-
-

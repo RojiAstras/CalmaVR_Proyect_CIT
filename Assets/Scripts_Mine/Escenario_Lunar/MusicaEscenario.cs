@@ -33,6 +33,11 @@ public class MusicaEscenario : MonoBehaviour
             tocarMusica(randomIndex);
             flagMusica = false;
         }
+
+        if (!aSource.isPlaying)
+        {
+            flagMusica = true;
+        }
     }
 
     public void tocarMusica(int Index)

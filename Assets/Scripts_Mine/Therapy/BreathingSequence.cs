@@ -4,8 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-
-
 public class BreathingSequence : MonoBehaviour
 {
     [Header("Panels")]
@@ -14,7 +12,7 @@ public class BreathingSequence : MonoBehaviour
     public GameObject breathingSphere;
 
     [Header("Texts")]
-    public TMP_Text phaseText; //Texto "Inhala / Manten / Exhala"
+    public TMP_Text phaseText; // Texto "Inhala / Mantén / Exhala"
 
     [Header("Settings")]
     public int totalCycles = 3;
@@ -25,32 +23,44 @@ public class BreathingSequence : MonoBehaviour
     public float maxScale = 1.0f;
 
     [Header("Colors por fase")]
-    public Color inhaleColor = new Color(0.3f, 0.6f, 1f); //Azul suave
+    public Color inhaleColor = new Color(0.3f, 0.6f, 1f); // Azul suave
     public Color holdColor = Color.white;
-    public Color exhaleColor = new Color(0.2f, 0.4f, 0.8f); //Azul Oscuro
-    
+    public Color exhaleColor = new Color(0.2f, 0.4f, 0.8f); // Azul oscuro
 
     [Header("Intro Settings")]
+    public AudioClip introAudioClip;
+    public float extraIntroDelay = 2f;
     public float introDuration = 5f;
+
+    [Header("Audios por fase")]
+    public AudioClip inhaleAudio;
+    public AudioClip holdAudio;
+    public AudioClip exhaleAudio;
+
+    [Header("Audio Final")]
+    public AudioClip endAudioClip;
+    public float extraEndDelay = 2f; // tiempo adicional después del audio final
 
     private bool breathingActive = false;
     private Renderer sphereRenderer;
     private int currentCycle = 0;
+    private AudioSource audioSource;
 
     private void Start()
     {
+        // Buscar o agregar un AudioSource automáticamente
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
+
         if (breathingSphere != null)
-        {
             sphereRenderer = breathingSphere.GetComponent<Renderer>();
-        }
 
         if (phaseText != null)
-        {
             phaseText.text = "";
-        }
     }
 
-    public void StartSequence ()
+    public void StartSequence()
     {
         panelStart.SetActive(false);
         StartCoroutine(ShowIntroThenBreathing());
@@ -59,7 +69,20 @@ public class BreathingSequence : MonoBehaviour
     private IEnumerator ShowIntroThenBreathing()
     {
         panelintro.SetActive(true);
-        yield return new WaitForSeconds(introDuration);
+
+        // Si hay audio de introducción, usar su duración
+        if (introAudioClip != null)
+        {
+            PlayAudio(introAudioClip);
+            yield return new WaitForSeconds(introAudioClip.length + extraIntroDelay);
+        }
+        else
+        {
+            // Si no hay audio, usar la duración fija
+            yield return new WaitForSeconds(introDuration);
+        }
+
+        // Ocultar panel e iniciar respiración
         panelintro.SetActive(false);
 
         breathingSphere.SetActive(true);
@@ -67,49 +90,63 @@ public class BreathingSequence : MonoBehaviour
         currentCycle = 0;
         StartCoroutine(BreathingRoutine());
     }
-    
+
     private IEnumerator BreathingRoutine()
     {
         while (breathingActive && currentCycle < totalCycles)
         {
             currentCycle++;
 
-            //Inhalar (Aumenta el tamaño)
+            // Inhalar
             if (phaseText) phaseText.text = "Inhala";
+            PlayAudio(inhaleAudio);
             yield return StartCoroutine(ScaleSphere(maxScale, inhaleTime, inhaleColor));
 
-            // Mantener (aguante)
-            if (phaseText) phaseText.text = "Manten";
+            // Mantener
+            if (phaseText) phaseText.text = "Mantén";
+            PlayAudio(holdAudio);
             yield return StartCoroutine(HoldPhase(holdTime, holdColor));
 
-            //Exhalar (disminuye el tamaño)
+            // Exhalar
             if (phaseText) phaseText.text = "Exhala";
+            PlayAudio(exhaleAudio);
             yield return StartCoroutine(ScaleSphere(minScale, exhaleTime, exhaleColor));
         }
 
-        //Final
+        // Final del ejercicio
         breathingActive = false;
         if (phaseText) phaseText.text = "Ejercicio Completado";
-        yield return new WaitForSeconds(3f);
-        phaseText.text = "";
+
+        // Reproducir audio final si existe
+        if (endAudioClip != null)
+        {
+            PlayAudio(endAudioClip);
+            yield return new WaitForSeconds(endAudioClip.length + extraEndDelay);
+        }
+        else
+        {
+            yield return new WaitForSeconds(3f);
+        }
+
+        // Limpiar y volver al inicio
+        if (phaseText) phaseText.text = "";
         breathingSphere.SetActive(false);
-        panelStart.SetActive(true); // volver al inicio o tambien cambiarlo a una pantalla que diga "ejercicio completado"
+        panelStart.SetActive(true);
     }
 
     private IEnumerator ScaleSphere(float targetScale, float duration, Color targetColor)
     {
-        Vector3 startScake = breathingSphere.transform.localScale;
+        Vector3 startScale = breathingSphere.transform.localScale;
         Vector3 endScale = Vector3.one * targetScale;
         Color startColor = sphereRenderer.material.color;
 
         float elapsed = 0f;
-
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
             float t = elapsed / duration;
 
-            breathingSphere.transform.localScale = Vector3.Lerp(startScake, endScale, t);
+            breathingSphere.transform.localScale = Vector3.Lerp(startScale, endScale, t);
             sphereRenderer.material.color = Color.Lerp(startColor, targetColor, t);
             yield return null;
         }
@@ -123,7 +160,7 @@ public class BreathingSequence : MonoBehaviour
         Color startColor = sphereRenderer.material.color;
         float elapsed = 0f;
 
-        while(elapsed < duration)
+        while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
             float t = elapsed / duration;
@@ -132,5 +169,13 @@ public class BreathingSequence : MonoBehaviour
         }
 
         sphereRenderer.material.color = targetColor;
+    }
+
+    private void PlayAudio(AudioClip clip)
+    {
+        if (clip == null) return;
+        audioSource.Stop();
+        audioSource.clip = clip;
+        audioSource.Play();
     }
 }

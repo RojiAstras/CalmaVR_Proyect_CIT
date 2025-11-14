@@ -1572,7 +1572,18 @@ MonoBehaviour:
     useEmojis: 1
     yesNoAnswer: 0
     scaleAnswer: 10
-  emojiText: {fileID: 4839542825881455699}
+  emojiImage: {fileID: 4702365216301847736}
+  emojiTextures:
+  - {fileID: 2800000, guid: 3e90c23518404234b93aec8713eaf6e8, type: 3}
+  - {fileID: 2800000, guid: 3e53c2716307f04448945537762992a4, type: 3}
+  - {fileID: 2800000, guid: 99eac920254b5c648a8e36fa60b63d19, type: 3}
+  - {fileID: 2800000, guid: 97c7c0b55fe193d49be07a461ac089d3, type: 3}
+  - {fileID: 2800000, guid: e057fa439c654174bb95fa5c4cf18d6e, type: 3}
+  - {fileID: 2800000, guid: caa77c6d5dc597b4e89d77b6f05eff36, type: 3}
+  - {fileID: 2800000, guid: 9e520882accbffb4490e3786971b5946, type: 3}
+  - {fileID: 2800000, guid: b2b6c0508244c5549ac2968a05b2db39, type: 3}
+  - {fileID: 2800000, guid: 119d3e51e832aba43989c0572a608941, type: 3}
+  - {fileID: 2800000, guid: 119d3e51e832aba43989c0572a608941, type: 3}
   endAudioClip: {fileID: 0}
   audioSource: {fileID: 0}
   endAudioDelay: 0.5
@@ -1920,16 +1931,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &4839542825881455699 stripped
+--- !u!114 &4702365216301847736 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1699929452279085709, guid: fbc4e2218c06ed144b2ab0a893dc6114,
+  m_CorrespondingSourceObject: {fileID: 1584411767578485350, guid: fbc4e2218c06ed144b2ab0a893dc6114,
     type: 3}
   m_PrefabInstance: {fileID: 6106562630030587614}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &5145710718030890760 stripped
