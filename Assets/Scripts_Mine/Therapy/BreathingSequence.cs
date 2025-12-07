@@ -42,9 +42,13 @@ public class BreathingSequence : MonoBehaviour
     public float extraEndDelay = 2f; // tiempo adicional después del audio final
 
     private bool breathingActive = false;
+    private bool breathingStart = false;
     private Renderer sphereRenderer;
     private int currentCycle = 0;
     private AudioSource audioSource;
+
+    public bool IsSequenceRunning { get { return breathingStart; } }
+    public bool SequenceFinished { get; private set; } = false;
 
     private void Start()
     {
@@ -63,6 +67,8 @@ public class BreathingSequence : MonoBehaviour
     public void StartSequence()
     {
         panelStart.SetActive(false);
+        SequenceFinished = false;
+        breathingStart = true;
         StartCoroutine(ShowIntroThenBreathing());
     }
 
@@ -114,8 +120,10 @@ public class BreathingSequence : MonoBehaviour
         }
 
         // Final del ejercicio
+        breathingStart = false;
         breathingActive = false;
         if (phaseText) phaseText.text = "Ejercicio Completado";
+
 
         // Reproducir audio final si existe
         if (endAudioClip != null)
@@ -127,6 +135,7 @@ public class BreathingSequence : MonoBehaviour
         {
             yield return new WaitForSeconds(3f);
         }
+        SequenceFinished = true;
 
         // Limpiar y volver al inicio
         if (phaseText) phaseText.text = "";
@@ -178,4 +187,6 @@ public class BreathingSequence : MonoBehaviour
         audioSource.clip = clip;
         audioSource.Play();
     }
+
+
 }
